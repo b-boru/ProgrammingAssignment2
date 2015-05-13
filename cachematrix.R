@@ -130,3 +130,22 @@ cacheSolve <- function(cachedMatrix, ...) {
     ## or calculated if not found in the cache
     inverseMatrix
 }
+
+##-------------------------------------------------------------------------------------------
+## This function tests makeCacheMatrix() and cacheSolve()
+##
+cacheTest <- function() {
+	## 2x2 test matrix
+	testMatrix <- matrix(c(1, 3, 8, -2), 2, 2)
+	## directly calculate its inverse
+	testInverse <- solve(testMatrix)
+	## now, put the content of testMatrix into a cached matrix object
+	cachedTestMatrix <- makeCacheMatrix(x)
+	## get its inverse: this should calculate the inverse matrix
+	inverse_1 <- cacheSolve(cachedTestMatrix)
+	## get its inverse again: this should now use the cached value
+	inverse_2 <- cacheSolve(cachedTestMatrix)
+	## return TRUE if the values returned by the cached matrix object
+	## have the same content as the calculated inverse
+	identical(testInverse, inverse_1) && identical(testInverse, inverse_2)
+}
