@@ -110,6 +110,7 @@ cacheSolve <- function(cachedMatrix, ...) {
     if (is.null(inverseMatrix)) {
         ## the cached value returned is NULL.
         ## This means that the inverse matrix has never been calculated yet: do it now
+        message("cacheSolve: not in cache, calculate inverse matrix")
         
         ## get the matrix data from the cached matrix object
         matrixData <- cachedMatrix$get()
@@ -123,7 +124,7 @@ cacheSolve <- function(cachedMatrix, ...) {
     else {
         ## just for debugging: tell that we could get cached data instead of calculating
         ## the inverse of the matrix
-        message("getting cached data")
+        message("cacheSolve: getting cached data")
     }
 
     ## the return value is the inverse of the matrix, that was either found in the cache,
@@ -140,12 +141,49 @@ cacheTest <- function() {
 	## directly calculate its inverse
 	testInverse <- solve(testMatrix)
 	## now, put the content of testMatrix into a cached matrix object
-	cachedTestMatrix <- makeCacheMatrix(x)
+	cachedTestMatrix <- makeCacheMatrix(testMatrix)
 	## get its inverse: this should calculate the inverse matrix
 	inverse_1 <- cacheSolve(cachedTestMatrix)
 	## get its inverse again: this should now use the cached value
 	inverse_2 <- cacheSolve(cachedTestMatrix)
-	## return TRUE if the values returned by the cached matrix object
+	## TRUE if the values returned by the cached matrix object
 	## have the same content as the calculated inverse
-	identical(testInverse, inverse_1) && identical(testInverse, inverse_2)
+	ok = identical(testInverse, inverse_1) && identical(testInverse, inverse_2)
+    ## display this part of the test results
+	message("test part 1 is ", ok)
+	
+    ## another 2x2 test matrix
+	testMatrix2 <- matrix(c(5, 9, -3, 12), 2, 2)
+	## directly calculate its inverse
+	testInverse2 <- solve(testMatrix2)
+	## change the content of the existing cached matrix
+	cachedTestMatrix$set(testMatrix2)
+	## get its inverse: this should re-calculate the inverse matrix,
+    ## because we changed the content of the matrix
+	inverse_1 <- cacheSolve(cachedTestMatrix)
+	## get its inverse again: this should now use the cached value
+	inverse_2 <- cacheSolve(cachedTestMatrix)
+	## TRUE if the values returned by the cached matrix object
+	## have the same content as the calculated inverse
+	ok2 = identical(testInverse2, inverse_1) && identical(testInverse2, inverse_2)
+	## display this part of the test results
+	message("test part 2 is ", ok2)
+	
+    ## now, start with an empty cached matrix
+	cachedTestMatrix2 <- makeCacheMatrix()
+	## give it a non-empty matrix
+	cachedTestMatrix2$set(testMatrix2)
+	## get its inverse: this should re-calculate the inverse matrix,
+	## because we changed the content of the matrix
+	inverse_1 <- cacheSolve(cachedTestMatrix2)
+	## get its inverse again: this should now use the cached value
+	inverse_2 <- cacheSolve(cachedTestMatrix2)
+	## TRUE if the values returned by the cached matrix object
+	## have the same content as the calculated inverse
+	ok3 = identical(testInverse2, inverse_1) && identical(testInverse2, inverse_2)
+	## display this part of the test results
+	message("test part 3 is ", ok3)
+    
+    ## return value is TRUE if all the three tests are OK
+    ok && ok2 && ok3
 }
